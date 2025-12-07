@@ -1,13 +1,13 @@
+import * as fs from 'node:fs';
 import * as path from 'node:path';
-import * as vscode from 'vscode';
-import * as fs from 'fs';
 import {
-	modify,
 	applyEdits,
-	parse,
 	type FormattingOptions,
 	type ModificationOptions,
+	modify,
+	parse,
 } from 'jsonc-parser';
+import * as vscode from 'vscode';
 import type { MappingItem } from '../types';
 
 // 無駄な書き込みを防ぐためのキャッシュ

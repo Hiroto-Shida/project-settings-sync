@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { findSettingsDir, resolveSettingsPaths } from '../../utils/pathUtils';
 
 // fsモジュールをモック化（実際にファイルシステムを触らないようにする）
-vi.mock('fs');
+vi.mock('node:fs');
 
 describe('pathUtils', () => {
 	describe('resolveSettingsPaths', () => {

@@ -1,21 +1,21 @@
-import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import {
-	modify,
 	applyEdits,
-	format,
-	type FormattingOptions,
-	type ModificationOptions,
 	type Edit,
+	type FormattingOptions,
+	format,
+	type ModificationOptions,
+	modify,
 } from 'jsonc-parser';
-import {
-	loadSettingsForEditor,
-	getSettingsPathForEditor,
-} from '../utils/configUtils';
-import { resolveSettingsPaths, findSettingsDir } from '../utils/pathUtils';
-import { getFocusModeRules } from './focusMode';
+import * as vscode from 'vscode';
 import type { MappingItem } from '../types';
+import {
+	getSettingsPathForEditor,
+	loadSettingsForEditor,
+} from '../utils/configUtils';
+import { findSettingsDir, resolveSettingsPaths } from '../utils/pathUtils';
+import { getFocusModeRules } from './focusMode';
 
 let previouslyAppliedKeys: string[] = [];
 let currentSettingsPath: string | null = null;
@@ -133,7 +133,7 @@ export async function syncSettings(
 		 * 部分的な編集でもJSON構造（カンマ等）を正常に保つためにフォーマットを行います。
 		 */
 		const applyAndFormat = (currentContent: string, edits: Edit[]) => {
-			let nextContent = applyEdits(currentContent, edits);
+			const nextContent = applyEdits(currentContent, edits);
 			const formatEdits = format(nextContent, undefined, formattingOptions);
 			return applyEdits(nextContent, formatEdits);
 		};
