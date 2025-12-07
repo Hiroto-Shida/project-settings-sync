@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { MappingItem } from '../types';
 
@@ -43,7 +43,7 @@ export async function applyFocusMode(editor: vscode.TextEditor | undefined) {
 			);
 		});
 
-		if (matchedItem && matchedItem.path) {
+		if (matchedItem?.path) {
 			activeProjectPath = matchedItem.path;
 		}
 	}

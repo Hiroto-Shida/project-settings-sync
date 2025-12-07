@@ -1,6 +1,6 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { findSettingsDir, resolveSettingsPaths } from '../../utils/pathUtils';
 
 // fsモジュールをモック化（実際にファイルシステムを触らないようにする）
@@ -29,7 +29,7 @@ describe('pathUtils', () => {
 
 			const result = resolveSettingsPaths(settings, prefix);
 
-			expect(result['locales']).toEqual([
+			expect(result.locales).toEqual([
 				'packages/app/locales/en',
 				'packages/app/locales/ja',
 			]);
@@ -44,8 +44,8 @@ describe('pathUtils', () => {
 
 			const result = resolveSettingsPaths(settings, prefix);
 
-			expect(result['absolute']).toBe('/usr/local/bin');
-			expect(result['url']).toBe('https://example.com/schema.json');
+			expect(result.absolute).toBe('/usr/local/bin');
+			expect(result.url).toBe('https://example.com/schema.json');
 		});
 
 		it('ネストしたオブジェクトのキーと値も変換する', () => {

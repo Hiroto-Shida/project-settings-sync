@@ -1,11 +1,11 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import {
 	applyEdits,
 	type FormattingOptions,
 	type ModificationOptions,
 	modify,
 } from 'jsonc-parser';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import {
 	getSettingsPathForEditor,

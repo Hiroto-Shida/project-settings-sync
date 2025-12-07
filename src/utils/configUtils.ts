@@ -1,6 +1,6 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { parse } from 'jsonc-parser';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import type { MappingItem } from '../types';
 import { findSettingsDir } from './pathUtils';

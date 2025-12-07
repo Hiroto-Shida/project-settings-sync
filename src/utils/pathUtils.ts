@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 /**
  * 設定オブジェクト内のパス文字列（文字列、配列、オブジェクト）を検出し、
