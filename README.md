@@ -42,6 +42,11 @@
   // フォーカスモード（検索スコープ制御）を有効にするか
   "projectSettingsSync.focusMode": true,
 
+  // 有効なプロジェクト以外を開いた際に、適用済みの設定をリセットするか
+  // false（デフォルト）: 直前のプロジェクト設定を維持
+  // true: 設定を自動的にクリーンアップして初期状態に戻す
+  "projectSettingsSync.autoCleanup": false,
+
   // タブ切り替え時の同期遅延時間 (ms) - デフォルト: 500
   "projectSettingsSync.debounceDelay": 200
 }
