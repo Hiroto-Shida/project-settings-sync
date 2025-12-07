@@ -31,13 +31,10 @@ export async function syncSettings(editor: vscode.TextEditor | undefined) {
 
 	// 対象外ファイルを開いたときの挙動制御
 	if (nextSettingsPath === null) {
-		// 設定が見つからない（対象外）場合
 		if (!autoCleanup) {
-			// 自動クリーンアップがOFFなら、何もしない（前の設定を維持）
-			// console.log('対象外ファイルですが、設定を維持します');
+			// 自動クリーンアップがOFFなら、設定を維持して終了
 			return;
 		}
-		// autoCleanup: true なら、このまま進んで targetSettings={} になり、クリーンアップが走る
 	}
 
 	// 2. 設定ファイルの場所が変わっていなければ早期リターン
@@ -117,11 +114,38 @@ export async function syncSettings(editor: vscode.TextEditor | undefined) {
 	// 新規設定の適用
 	for (const key of newKeys) {
 		const newValue = targetSettings[key];
-		const edits = modify(content, [key], newValue, modificationOptions);
 
-		if (edits.length > 0) {
-			content = applyEdits(content, edits);
-			hasChanges = true;
+		// オブジェクト型の場合、または値が大きく変わる可能性がある場合は
+		// マージミスを防ぐために「削除 -> 新規作成」の手順を踏む
+		const isComplexValue = typeof newValue === 'object' && newValue !== null;
+
+		if (isComplexValue) {
+			// A. まず既存の値を削除する
+			const removeEdits = modify(
+				content,
+				[key],
+				undefined,
+				modificationOptions,
+			);
+			if (removeEdits.length > 0) {
+				content = applyEdits(content, removeEdits);
+				hasChanges = true;
+			}
+
+			// B. 改めて新しい値をセットする
+			const addEdits = modify(content, [key], newValue, modificationOptions);
+			if (addEdits.length > 0) {
+				content = applyEdits(content, addEdits);
+				hasChanges = true;
+			}
+		} else {
+			// 文字列や数値などの単純な値は、そのまま上書き更新
+			const edits = modify(content, [key], newValue, modificationOptions);
+
+			if (edits.length > 0) {
+				content = applyEdits(content, edits);
+				hasChanges = true;
+			}
 		}
 	}
 
