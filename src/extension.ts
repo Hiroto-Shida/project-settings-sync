@@ -1,26 +1,73 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { ProjectDecorationProvider } from './features/badgeProvider';
+import { syncSettings } from './features/settingsSync';
+import { applyFocusMode } from './features/focusMode';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+let debounceTimer: NodeJS.Timeout | undefined;
+
+/**
+ * 拡張機能のエントリーポイント
+ */
 export function activate(context: vscode.ExtensionContext) {
+  // 1. バッジプロバイダーの登録
+  const provider = new ProjectDecorationProvider();
+  context.subscriptions.push(
+    vscode.window.registerFileDecorationProvider(provider),
+  );
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "path-color-changer" is now active!');
+  // 2. アクティブエディタ変更イベントの監視
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(() => {
+      triggerUpdate();
+    }),
+  );
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('path-color-changer.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from path-color-changer!');
-	});
+  // 起動時の初期化
+  triggerUpdate(true);
 
-	context.subscriptions.push(disposable);
+  // 3. 設定変更の監視
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration('projectSettingsSync')) {
+        provider.refresh();
+        triggerUpdate();
+      }
+    }),
+  );
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+/**
+ * 設定同期とフォーカスモード適用をトリガーします。
+ * 連続操作時の負荷軽減のためデバウンス制御を行います。
+ */
+function triggerUpdate(immediate: boolean = false) {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = undefined;
+  }
+
+  const config = vscode.workspace.getConfiguration('projectSettingsSync');
+  const delay = config.get<number>('debounceDelay', 500);
+
+  if (immediate) {
+    performSync(vscode.window.activeTextEditor);
+  } else {
+    debounceTimer = setTimeout(() => {
+      performSync(vscode.window.activeTextEditor);
+    }, delay);
+  }
+}
+
+/**
+ * 同期処理のオーケストレーター
+ */
+async function performSync(editor: vscode.TextEditor | undefined) {
+  await syncSettings(editor);
+  await applyFocusMode(editor);
+}
+
+export function deactivate() {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+  }
+}

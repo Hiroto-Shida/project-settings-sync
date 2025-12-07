@@ -1,71 +1,48 @@
-# path-color-changer README
+# Project Settings Sync
 
-This is the README for your extension "path-color-changer". After writing up a brief description, we recommend including the following sections.
+モノレポ（Monorepo）やマルチプロジェクト構成の開発を強力にサポートする VS Code 拡張機能です。
+現在開いているファイルに応じて、サブプロジェクトの設定をルートに自動同期し、開発コンテキスト（設定・検索範囲・見た目）をシームレスに切り替えます。
 
-## Features
+## ✨ 特徴
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+1.  **設定の自動同期 (Settings Sync)**
+    - サブディレクトリ（プロジェクト）にある `.vscode/settings.json` を読み込み、ルートのワークスペース設定に自動でマージします。
+    - タブを切り替えるだけで、フォーマッタやLinterの設定がそのプロジェクト専用のものに切り替わります。
+    - 相対パス（`node_modules/...` 等）をルート基準のパス（`apps/app1/node_modules/...`）に自動で書き換えます。
 
-For example if there is an image subfolder under your extension project workspace:
+2.  **フォーカスモード (Focus Mode)**
+    - 作業中のプロジェクト以外のファイルを、検索結果（`Cmd+P` や全文検索）から自動で除外します。
+    - 同名のファイルや別プロジェクトのノイズに悩まされることがなくなります。
 
-\!\[feature X\]\(images/feature-x.png\)
+3.  **プロジェクトバッジ (Project Badge)**
+    - エクスプローラーのフォルダや、開いているタブの横に「バッジ（アイコンや短い文字）」を表示します。
+    - 今どのプロジェクトのファイルを触っているかが一目でわかります。
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## ⚙️ 設定 (Usage)
 
-## Requirements
+ルートの `.vscode/settings.json` に設定を記述します。
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+```json
+{
+  // 拡張機能を有効にするプロジェクトのパスとバッジの設定
+  "projectSettingsSync.mappings": [
+    {
+      "path": "apps/frontend",
+      "badge": "FE"
+    },
+    {
+      "path": "apps/backend",
+      "badge": {
+        "root": "🟣", // フォルダに表示するバッジ
+        "file": "🟪" // ファイル(タブ)に表示するバッジ
+      }
+    }
+  ],
 
-## Extension Settings
+  // フォーカスモード（検索スコープ制御）を有効にするか
+  "projectSettingsSync.focusMode": true,
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+  // タブ切り替え時の同期遅延時間 (ms) - デフォルト: 500
+  "projectSettingsSync.debounceDelay": 200
+}
+```

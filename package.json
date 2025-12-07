@@ -1,23 +1,77 @@
 {
-  "name": "path-color-changer",
-  "displayName": "path-color-changer",
-  "description": "",
+  "name": "project-settings-sync",
+  "displayName": "Project Settings Sync",
+  "description": "Automatically sync settings and switch context for monorepo sub-projects.",
+  "publisher": "hiromoa1",
+  "icon": "icon.png",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.106.1"
+    "vscode": "^1.80.0"
   },
-  "categories": [
-    "Other"
+  "activationEvents": [
+    "*"
   ],
-  "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "path-color-changer.helloWorld",
-        "title": "Hello World"
+    "configuration": {
+      "title": "Project Settings Sync",
+      "properties": {
+        "projectSettingsSync.debounceDelay": {
+          "type": "number",
+          "default": 500,
+          "description": "タブ切り替え時の設定同期の待機時間 (ミリ秒)"
+        },
+        "projectSettingsSync.focusMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "フォーカスモード: 開いているプロジェクト以外のファイルを検索結果から除外します。"
+        },
+        "projectSettingsSync.mappings": {
+          "type": "array",
+          "description": "拡張機能を有効にするパスとバッジの設定リスト",
+          "default": [],
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "有効にするプロジェクトのパス"
+              },
+              "badge": {
+                "description": "バッジ設定",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "ルートとファイルの両方に同じバッジを表示します",
+                    "maxLength": 2
+                  },
+                  {
+                    "type": "object",
+                    "description": "個別に設定します",
+                    "properties": {
+                      "root": {
+                        "type": "string",
+                        "description": "ルートディレクトリ用のバッジ",
+                        "maxLength": 2
+                      },
+                      "file": {
+                        "type": "string",
+                        "description": "ファイル(タブ)用のバッジ",
+                        "maxLength": 2
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "path"
+            ]
+          }
+        }
       }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -28,19 +82,28 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "format": "prettier --write src",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@types/vscode": "^1.106.1",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "typescript-eslint": "^8.48.1",
-    "eslint": "^9.39.1",
-    "typescript": "^5.9.3",
-    "ts-loader": "^9.5.4",
-    "webpack": "^5.103.0",
-    "webpack-cli": "^6.0.1",
+    "@types/prettier": "^2.7.3",
+    "@types/vscode": "^1.106.1",
     "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2"
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.48.1",
+    "vitest": "^3.2.4",
+    "webpack": "^5.103.0",
+    "webpack-cli": "^6.0.1"
+  },
+  "dependencies": {
+    "jsonc-parser": "^3.3.1"
   }
 }
