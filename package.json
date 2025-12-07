@@ -3,7 +3,7 @@
   "displayName": "Project Settings Sync",
   "description": "Automatically sync settings and switch context for monorepo sub-projects.",
   "publisher": "hiromoa1",
-  "icon": "icon.png",
+  "icon": "assets/icon.png",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.80.0"
