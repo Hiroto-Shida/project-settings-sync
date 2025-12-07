@@ -22,8 +22,23 @@ let currentSettingsPath: string | null = null;
  * ファイルIOを最小限にするため、パス変更検知やメモリ内編集を活用しています。
  */
 export async function syncSettings(editor: vscode.TextEditor | undefined) {
+  // コンフィグの読み込み
+  const extConfig = vscode.workspace.getConfiguration('projectSettingsSync');
+  const autoCleanup = extConfig.get<boolean>('autoCleanup', false);
+
   // 1. 今回適用すべき設定ファイルのパスを特定
   const nextSettingsPath = getSettingsPathForEditor(editor);
+
+  // 対象外ファイルを開いたときの挙動制御
+  if (nextSettingsPath === null) {
+    // 設定が見つからない（対象外）場合
+    if (!autoCleanup) {
+      // 自動クリーンアップがOFFなら、何もしない（前の設定を維持）
+      // console.log('対象外ファイルですが、設定を維持します');
+      return;
+    }
+    // autoCleanup: true なら、このまま進んで targetSettings={} になり、クリーンアップが走る
+  }
 
   // 2. 設定ファイルの場所が変わっていなければ早期リターン
   if (nextSettingsPath === currentSettingsPath) {

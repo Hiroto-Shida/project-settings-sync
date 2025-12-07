@@ -21,6 +21,11 @@
           "default": 500,
           "description": "タブ切り替え時の設定同期の待機時間 (ミリ秒)"
         },
+        "projectSettingsSync.autoCleanup": {
+          "type": "boolean",
+          "default": false,
+          "description": "有効なプロジェクト以外(ルートファイル等)を開いた際に、適用済みの設定をリセットするかどうか。falseの場合、直前のプロジェクト設定が維持されます。"
+        },
         "projectSettingsSync.focusMode": {
           "type": "boolean",
           "default": false,

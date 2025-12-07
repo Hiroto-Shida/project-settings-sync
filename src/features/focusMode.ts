@@ -10,6 +10,7 @@ export async function applyFocusMode(editor: vscode.TextEditor | undefined) {
   const extConfig = vscode.workspace.getConfiguration('projectSettingsSync');
 
   const isFocusModeEnabled = extConfig.get<boolean>('focusMode', false);
+  const autoCleanup = extConfig.get<boolean>('autoCleanup', false);
   const mappings = extConfig.get<MappingItem[]>('mappings');
 
   if (
@@ -45,6 +46,15 @@ export async function applyFocusMode(editor: vscode.TextEditor | undefined) {
     if (matchedItem && matchedItem.path) {
       activeProjectPath = matchedItem.path;
     }
+  }
+
+  // プロジェクト外のファイルを開いた場合
+  if (!activeProjectPath) {
+    if (!autoCleanup) {
+      // 自動クリーンアップOFFなら、検索スコープを変更せず終了（維持）
+      return;
+    }
+    // ONなら、下のループで activeProjectPath が null なので、全パターンが false (制限解除) になる
   }
 
   // 更新用の一時オブジェクト作成
