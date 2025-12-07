@@ -1,17 +1,17 @@
-import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as path from 'path';
 import {
-  modify,
-  applyEdits,
-  FormattingOptions,
-  ModificationOptions,
+	applyEdits,
+	type FormattingOptions,
+	type ModificationOptions,
+	modify,
 } from 'jsonc-parser';
+import * as path from 'path';
+import * as vscode from 'vscode';
 import {
-  loadSettingsForEditor,
-  getSettingsPathForEditor,
+	getSettingsPathForEditor,
+	loadSettingsForEditor,
 } from '../utils/configUtils';
-import { resolveSettingsPaths, findSettingsDir } from '../utils/pathUtils';
+import { findSettingsDir, resolveSettingsPaths } from '../utils/pathUtils';
 
 // --- モジュール内ステート ---
 let previouslyAppliedKeys: string[] = [];
@@ -22,135 +22,135 @@ let currentSettingsPath: string | null = null;
  * ファイルIOを最小限にするため、パス変更検知やメモリ内編集を活用しています。
  */
 export async function syncSettings(editor: vscode.TextEditor | undefined) {
-  // コンフィグの読み込み
-  const extConfig = vscode.workspace.getConfiguration('projectSettingsSync');
-  const autoCleanup = extConfig.get<boolean>('autoCleanup', false);
+	// コンフィグの読み込み
+	const extConfig = vscode.workspace.getConfiguration('projectSettingsSync');
+	const autoCleanup = extConfig.get<boolean>('autoCleanup', false);
 
-  // 1. 今回適用すべき設定ファイルのパスを特定
-  const nextSettingsPath = getSettingsPathForEditor(editor);
+	// 1. 今回適用すべき設定ファイルのパスを特定
+	const nextSettingsPath = getSettingsPathForEditor(editor);
 
-  // 対象外ファイルを開いたときの挙動制御
-  if (nextSettingsPath === null) {
-    // 設定が見つからない（対象外）場合
-    if (!autoCleanup) {
-      // 自動クリーンアップがOFFなら、何もしない（前の設定を維持）
-      // console.log('対象外ファイルですが、設定を維持します');
-      return;
-    }
-    // autoCleanup: true なら、このまま進んで targetSettings={} になり、クリーンアップが走る
-  }
+	// 対象外ファイルを開いたときの挙動制御
+	if (nextSettingsPath === null) {
+		// 設定が見つからない（対象外）場合
+		if (!autoCleanup) {
+			// 自動クリーンアップがOFFなら、何もしない（前の設定を維持）
+			// console.log('対象外ファイルですが、設定を維持します');
+			return;
+		}
+		// autoCleanup: true なら、このまま進んで targetSettings={} になり、クリーンアップが走る
+	}
 
-  // 2. 設定ファイルの場所が変わっていなければ早期リターン
-  if (nextSettingsPath === currentSettingsPath) {
-    return;
-  }
+	// 2. 設定ファイルの場所が変わっていなければ早期リターン
+	if (nextSettingsPath === currentSettingsPath) {
+		return;
+	}
 
-  // 3. キャッシュを更新
-  currentSettingsPath = nextSettingsPath;
+	// 3. キャッシュを更新
+	currentSettingsPath = nextSettingsPath;
 
-  // 4. 設定の読み込みと適用準備
-  let targetSettings = loadSettingsForEditor(editor);
+	// 4. 設定の読み込みと適用準備
+	let targetSettings = loadSettingsForEditor(editor);
 
-  const workspaceFolders = vscode.workspace.workspaceFolders;
-  if (!workspaceFolders) {
-    return;
-  }
-  const rootPath = workspaceFolders[0].uri.fsPath;
+	const workspaceFolders = vscode.workspace.workspaceFolders;
+	if (!workspaceFolders) {
+		return;
+	}
+	const rootPath = workspaceFolders[0].uri.fsPath;
 
-  // パス書き換え処理 (相対パスをルート基準に変換)
-  if (editor && editor.document.uri.scheme === 'file') {
-    const currentFilePath = editor.document.uri.fsPath;
-    const settingsDir = findSettingsDir(currentFilePath, rootPath);
+	// パス書き換え処理 (相対パスをルート基準に変換)
+	if (editor && editor.document.uri.scheme === 'file') {
+		const currentFilePath = editor.document.uri.fsPath;
+		const settingsDir = findSettingsDir(currentFilePath, rootPath);
 
-    if (settingsDir) {
-      const relativePath = path.relative(rootPath, settingsDir);
-      if (relativePath && relativePath !== '') {
-        const normalizedPrefix = relativePath.split(path.sep).join('/');
-        targetSettings = resolveSettingsPaths(targetSettings, normalizedPrefix);
-      }
-    }
-  }
+		if (settingsDir) {
+			const relativePath = path.relative(rootPath, settingsDir);
+			if (relativePath && relativePath !== '') {
+				const normalizedPrefix = relativePath.split(path.sep).join('/');
+				targetSettings = resolveSettingsPaths(targetSettings, normalizedPrefix);
+			}
+		}
+	}
 
-  const newKeys = Object.keys(targetSettings);
-  const rootSettingsPath = path.join(rootPath, '.vscode', 'settings.json');
+	const newKeys = Object.keys(targetSettings);
+	const rootSettingsPath = path.join(rootPath, '.vscode', 'settings.json');
 
-  // .vscodeフォルダ作成
-  const vscodeDir = path.dirname(rootSettingsPath);
-  if (!fs.existsSync(vscodeDir)) {
-    fs.mkdirSync(vscodeDir, { recursive: true });
-  }
+	// .vscodeフォルダ作成
+	const vscodeDir = path.dirname(rootSettingsPath);
+	if (!fs.existsSync(vscodeDir)) {
+		fs.mkdirSync(vscodeDir, { recursive: true });
+	}
 
-  // ファイルが開かれているかチェック (競合回避のため)
-  const openDoc = vscode.workspace.textDocuments.find(
-    (doc) => doc.uri.fsPath === rootSettingsPath,
-  );
+	// ファイルが開かれているかチェック (競合回避のため)
+	const openDoc = vscode.workspace.textDocuments.find(
+		(doc) => doc.uri.fsPath === rootSettingsPath,
+	);
 
-  // 編集ベースとなるテキストの取得
-  let content = openDoc
-    ? openDoc.getText()
-    : fs.existsSync(rootSettingsPath)
-      ? fs.readFileSync(rootSettingsPath, 'utf8')
-      : '{}';
+	// 編集ベースとなるテキストの取得
+	let content = openDoc
+		? openDoc.getText()
+		: fs.existsSync(rootSettingsPath)
+			? fs.readFileSync(rootSettingsPath, 'utf8')
+			: '{}';
 
-  const formattingOptions: FormattingOptions = {
-    tabSize: 4,
-    insertSpaces: true,
-    eol: '\n',
-  };
-  const modificationOptions: ModificationOptions = { formattingOptions };
+	const formattingOptions: FormattingOptions = {
+		tabSize: 4,
+		insertSpaces: true,
+		eol: '\n',
+	};
+	const modificationOptions: ModificationOptions = { formattingOptions };
 
-  let hasChanges = false;
+	let hasChanges = false;
 
-  // クリーンアップ: 不要になった設定の削除
-  const keysToRemove = previouslyAppliedKeys.filter(
-    (key) => !newKeys.includes(key),
-  );
+	// クリーンアップ: 不要になった設定の削除
+	const keysToRemove = previouslyAppliedKeys.filter(
+		(key) => !newKeys.includes(key),
+	);
 
-  for (const key of keysToRemove) {
-    const edits = modify(content, [key], undefined, modificationOptions);
-    if (edits.length > 0) {
-      content = applyEdits(content, edits);
-      hasChanges = true;
-    }
-  }
+	for (const key of keysToRemove) {
+		const edits = modify(content, [key], undefined, modificationOptions);
+		if (edits.length > 0) {
+			content = applyEdits(content, edits);
+			hasChanges = true;
+		}
+	}
 
-  // 新規設定の適用
-  for (const key of newKeys) {
-    const newValue = targetSettings[key];
-    const edits = modify(content, [key], newValue, modificationOptions);
+	// 新規設定の適用
+	for (const key of newKeys) {
+		const newValue = targetSettings[key];
+		const edits = modify(content, [key], newValue, modificationOptions);
 
-    if (edits.length > 0) {
-      content = applyEdits(content, edits);
-      hasChanges = true;
-    }
-  }
+		if (edits.length > 0) {
+			content = applyEdits(content, edits);
+			hasChanges = true;
+		}
+	}
 
-  if (!hasChanges) {
-    previouslyAppliedKeys = newKeys;
-    return;
-  }
+	if (!hasChanges) {
+		previouslyAppliedKeys = newKeys;
+		return;
+	}
 
-  // 保存処理
-  if (openDoc) {
-    // A. ファイルが開かれている場合: WorkspaceEdit APIで全文置換
-    const fullRange = new vscode.Range(
-      openDoc.positionAt(0),
-      openDoc.positionAt(openDoc.getText().length),
-    );
+	// 保存処理
+	if (openDoc) {
+		// A. ファイルが開かれている場合: WorkspaceEdit APIで全文置換
+		const fullRange = new vscode.Range(
+			openDoc.positionAt(0),
+			openDoc.positionAt(openDoc.getText().length),
+		);
 
-    const workspaceEdit = new vscode.WorkspaceEdit();
-    workspaceEdit.replace(openDoc.uri, fullRange, content);
+		const workspaceEdit = new vscode.WorkspaceEdit();
+		workspaceEdit.replace(openDoc.uri, fullRange, content);
 
-    await vscode.workspace.applyEdit(workspaceEdit);
-    await openDoc.save();
-  } else {
-    // B. ファイルが閉じている場合: fsで直接書き込み
-    try {
-      fs.writeFileSync(rootSettingsPath, content, 'utf8');
-    } catch (e) {
-      console.error(`書き込み失敗: ${e}`);
-    }
-  }
+		await vscode.workspace.applyEdit(workspaceEdit);
+		await openDoc.save();
+	} else {
+		// B. ファイルが閉じている場合: fsで直接書き込み
+		try {
+			fs.writeFileSync(rootSettingsPath, content, 'utf8');
+		} catch (e) {
+			console.error(`書き込み失敗: ${e}`);
+		}
+	}
 
-  previouslyAppliedKeys = newKeys;
+	previouslyAppliedKeys = newKeys;
 }
