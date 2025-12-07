@@ -6,7 +6,7 @@ import { syncSettings } from './features/settingsSync';
 let debounceTimer: NodeJS.Timeout | undefined;
 
 /**
- * 拡張機能のエントリーポイント
+ * 拡張機能の有効化処理
  */
 export function activate(context: vscode.ExtensionContext) {
 	// 1. バッジプロバイダーの登録
@@ -18,19 +18,25 @@ export function activate(context: vscode.ExtensionContext) {
 	// 2. アクティブエディタ変更イベントの監視
 	context.subscriptions.push(
 		vscode.window.onDidChangeActiveTextEditor(() => {
-			triggerUpdate();
+			// タブ切り替え時はキャッシュを活用して高速に処理 (force=false)
+			triggerUpdate(false);
 		}),
 	);
 
-	// 起動時の初期化
-	triggerUpdate(true);
+	// 起動時に一度強制実行
+	triggerUpdate(true, true);
 
 	// 3. 設定変更の監視
 	context.subscriptions.push(
 		vscode.workspace.onDidChangeConfiguration((e) => {
-			if (e.affectsConfiguration('projectSettingsSync')) {
+			// 自身の設定変更に加え、Peacock等による外部変更も監視対象とする
+			if (
+				e.affectsConfiguration('projectSettingsSync') ||
+				e.affectsConfiguration('workbench.colorCustomizations')
+			) {
 				provider.refresh();
-				triggerUpdate();
+				// 設定変更時はキャッシュを無視して強制同期 (force=true)
+				triggerUpdate(false, true);
 			}
 		}),
 	);
@@ -39,8 +45,10 @@ export function activate(context: vscode.ExtensionContext) {
 /**
  * 設定同期とフォーカスモード適用をトリガーします。
  * 連続操作時の負荷軽減のためデバウンス制御を行います。
+ * * @param immediate 待機時間を無視して即時実行するか
+ * @param force キャッシュを無視して強制的に書き込みを行うか
  */
-function triggerUpdate(immediate: boolean = false) {
+function triggerUpdate(immediate: boolean = false, force: boolean = false) {
 	if (debounceTimer) {
 		clearTimeout(debounceTimer);
 		debounceTimer = undefined;
@@ -50,20 +58,28 @@ function triggerUpdate(immediate: boolean = false) {
 	const delay = config.get<number>('debounceDelay', 500);
 
 	if (immediate) {
-		performSync(vscode.window.activeTextEditor);
+		performSync(vscode.window.activeTextEditor, force);
 	} else {
 		debounceTimer = setTimeout(() => {
-			performSync(vscode.window.activeTextEditor);
+			performSync(vscode.window.activeTextEditor, force);
 		}, delay);
 	}
 }
 
 /**
- * 同期処理のオーケストレーター
+ * 同期処理の実行
  */
-async function performSync(editor: vscode.TextEditor | undefined) {
-	await syncSettings(editor);
-	await applyFocusMode(editor);
+async function performSync(
+	editor: vscode.TextEditor | undefined,
+	force: boolean,
+) {
+	// 設定同期処理 (FocusModeの設定もここでマージして書き込まれます)
+	await syncSettings(editor, force);
+
+	// 設定変更時など、強制実行の際は念のため FocusMode 単体処理も実行
+	if (force) {
+		await applyFocusMode(editor, force);
+	}
 }
 
 export function deactivate() {
