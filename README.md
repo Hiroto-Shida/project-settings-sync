@@ -1,6 +1,6 @@
 # Project Settings Sync
 
-[**🇯🇵 日本語のドキュメントはこちら (Read in Japanese)**](https://github.com/Hiroto-Shida/project-settings-sync/blob/main/README-ja.md)
+[**🇯🇵 日本語のドキュメントはこちら (Read in Japanese)**](https://github.com/Hiroto-Shida/project-settings-sync/blob/main/readme/README-ja.md)
 
 ---
 
@@ -78,7 +78,7 @@ Add the following configuration to your **root** `.vscode/settings.json`:
 
 🎥 Demo
 
-<img src="https://github.com/Hiroto-Shida/project-settings-sync/blob/main/assets/demo.gif">
+<img src="https://github.com/Hiroto-Shida/project-settings-sync/blob/main/readme/demo.gif">
 
 In this demo, different color themes are applied to `workbench.colorCustomizations.titleBar.activeBackground` for each project.
 As you can see, the settings are automatically synced and the color theme changes instantly when switching tabs!
