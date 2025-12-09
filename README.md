@@ -4,7 +4,7 @@
 
 ---
 
-A VS Code extension that powerfully supports development in **Monorepo** or **Multi-project** configurations.
+A **VS Code extension** that powerfully supports development in **Monorepo** or **Multi-project** configurations.
 
 It automatically syncs sub-project settings to the root based on the currently open file or directory, seamlessly switching the development context (settings, search scope, and appearance).
 
