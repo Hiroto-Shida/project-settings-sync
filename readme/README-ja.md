@@ -73,6 +73,6 @@ admin-project/
 
 ## 🎥 デモ
 
-<img src="https://github.com/Hiroto-Shida/project-settings-sync/blob/main/assets/demo.gif">
+<img src="https://github.com/Hiroto-Shida/project-settings-sync/blob/main/readme/demo.gif">
 
 `workbench.colorCustomizations.titleBar.activeBackground` にそれぞれ異なるカラーテーマを当てているプロジェクトの切り替え時に、自動でその設定が同期され、タブ切り替え時にカラーテーマが変わっています！
