@@ -15,3 +15,4 @@ vsc-extension-quickstart.md
 **/*.ts
 biome.json
 vitest.**
+readme/demo.gif
