@@ -70,3 +70,7 @@ admin-project/
   "projectSettingsSync.focusMode": true,
 }
 ```
+
+## 🎥 デモ
+
+<img src="https://github.com/Hiroto-Shida/project-settings-sync/blob/main/assets/demo.gif">
