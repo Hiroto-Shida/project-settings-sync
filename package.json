@@ -1,5 +1,5 @@
 {
-  "name": "project-settings-sync",
+"name": "project-settings-sync",
   "displayName": "Project Settings Sync",
   "description": "Automatically sync settings and switch context for monorepo sub-projects.",
   "publisher": "hiromoa1",
@@ -19,49 +19,49 @@
         "projectSettingsSync.debounceDelay": {
           "type": "number",
           "default": 500,
-          "description": "タブ切り替え時の設定同期の待機時間 (ミリ秒)"
+          "description": "Delay in milliseconds before syncing settings after switching tabs."
         },
         "projectSettingsSync.autoCleanup": {
           "type": "boolean",
           "default": false,
-          "description": "有効なプロジェクト以外(ルートファイル等)を開いた際に、適用済みの設定をリセットするかどうか。falseの場合、直前のプロジェクト設定が維持されます。"
+          "description": "Whether to reset applied settings when opening a file outside of mapped projects (e.g., root files). If false, the previous project settings are maintained."
         },
         "projectSettingsSync.focusMode": {
           "type": "boolean",
           "default": false,
-          "description": "フォーカスモード: 開いているプロジェクト以外のファイルを検索結果から除外します。"
+          "description": "Focus Mode: Automatically excludes files outside the open project from search results."
         },
         "projectSettingsSync.mappings": {
           "type": "array",
-          "description": "拡張機能を有効にするパスとバッジの設定リスト",
+          "description": "List of project paths and badge configurations.",
           "default": [],
           "items": {
             "type": "object",
             "properties": {
               "path": {
                 "type": "string",
-                "description": "有効にするプロジェクトのパス"
+                "description": "The path of the project to enable."
               },
               "badge": {
-                "description": "バッジ設定",
+                "description": "Badge configuration.",
                 "anyOf": [
                   {
                     "type": "string",
-                    "description": "ルートとファイルの両方に同じバッジを表示します",
+                    "description": "Displays the same badge on both the root folder and files.",
                     "maxLength": 2
                   },
                   {
                     "type": "object",
-                    "description": "個別に設定します",
+                    "description": "Configure badges individually.",
                     "properties": {
                       "root": {
                         "type": "string",
-                        "description": "ルートディレクトリ用のバッジ",
+                        "description": "Badge for the root directory.",
                         "maxLength": 2
                       },
                       "file": {
                         "type": "string",
-                        "description": "ファイル(タブ)用のバッジ",
+                        "description": "Badge for files (tabs).",
                         "maxLength": 2
                       }
                     },
