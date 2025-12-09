@@ -1,27 +1,32 @@
 # Project Settings Sync
 
-モノレポ（Monorepo）やマルチプロジェクト構成の開発を強力にサポートする VS Code 拡張機能です。
-現在開いているファイル・ディレクトリに応じて、サブプロジェクトの設定をルートに自動同期し、開発コンテキスト（設定・検索範囲・見た目）をシームレスに切り替えます。
+[**🇯🇵 日本語のドキュメントはこちら (Read in Japanese)**](https://github.com/Hiroto-Shida/project-settings-sync/blob/main/README-ja.md)
 
-## ✨ 特徴
+---
 
-1.  **設定の自動同期 (Settings Sync)**
-    - サブディレクトリ（プロジェクト）にある `.vscode/settings.json` を読み込み、ルートのワークスペース設定に自動でマージします。
-    - vscode はプロジェクトルートにある `.vscode/settings.json` しか対応していないため、サブディレクトリに存在する `projectXxx/.vscode/settings.json` を親ディレクトリ操作時は適用されません。こちらの拡張機能をつかうことで、この問題を解決します
-    - タブを切り替えるだけで、フォーマッタやLinterの設定がそのプロジェクト専用のものに切り替わります。
-    - `settings.json` 内の相対パス（`node_modules/...` 等）をルート基準のパス（`apps/app1/node_modules/...`）に自動で書き換えます。
+A VS Code extension that powerfully supports development in **Monorepo** or **Multi-project** configurations.
 
-2.  **フォーカスモード (Focus Mode)**
-    - 作業中のプロジェクト以外のファイルを、検索結果（`Cmd+P` や全文検索）から自動で除外します。
-    - 同名のファイルや別プロジェクトのノイズに悩まされることがなくなります。
+It automatically syncs sub-project settings to the root based on the currently open file or directory, seamlessly switching the development context (settings, search scope, and appearance).
 
-3.  **プロジェクトバッジ (Project Badge)**
-    - エクスプローラーのフォルダや、開いているタブの横に「バッジ（アイコンや短い文字）」を表示します。
-    - 今どのプロジェクトのファイルを触っているかが一目でわかります。
+## ✨ Features
 
-## ⚙️ 設定 (Usage)
+1.  **Settings Sync**
+    - Automatically reads `.vscode/settings.json` from sub-directories (projects) and merges them into the root workspace settings.
+    - **Problem Solved:** By default, VS Code only recognizes `.vscode/settings.json` at the project root. Settings located in sub-directories (e.g., `projectXxx/.vscode/settings.json`) are ignored when working from the parent directory. This extension solves this issue.
+    - Simply switching tabs automatically applies project-specific settings, such as formatters and linters.
+    - Automatically rewrites relative paths in `settings.json` (e.g., `node_modules/...`) to root-relative paths (e.g., `apps/app1/node_modules/...`) to ensure they work correctly.
 
-下記のようなプロジェクトでの設定例です。
+2.  **Focus Mode**
+    - Automatically excludes files outside the active project from search results (`Cmd+P`, Quick Open, and full-text search).
+    - Eliminates noise from duplicate filenames or unrelated code in other projects.
+
+3.  **Project Badge**
+    - Displays a "Badge" (icon or short text) next to the folder in the Explorer and on the open tab.
+    - Allows you to instantly recognize which project's files you are currently working on.
+
+## ⚙️ Configuration (Usage)
+
+Below is an example configuration for a project structure like this:
 
 ```
 .vscode/
@@ -37,40 +42,43 @@ admin-project/
    └─ bbb.txt
 ```
 
-ルートの `.vscode/settings.json` に設定を記述します。
+Add the following configuration to your **root** `.vscode/settings.json`:
 
 ```json
 {
-  // 拡張機能を有効にするプロジェクトのパスとバッジの設定
+  // Settings for project paths and badges to enable the extension for
   "projectSettingsSync.mappings": [
     {
       "path": "project1",
       "badge": {
-        "root": "🟦", // プロジェクトルートに表示するバッジ (省略可能)
-        "file": "🔵" // ファイル(タブ)に表示するバッジ (省略可能)
+        "root": "🟦", // Badge to display on the project root folder (optional)
+        "file": "🔵"  // Badge to display on the file/tab (optional)
       }
     },
     {
       "path": "admin-project/projectX",
-      "badge": "🟥" // ディレクトリおよびファイルすべてに表示するバッジ (省略可能)
+      "badge": "🟥"   // Badge to display on both directory and files (optional)
     }
   ],
 
-  // タブ切り替え後に更新処理を開始するまでの遅延時間 (ms) - デフォルト: 500
+  // Delay time (ms) before starting the update process after switching tabs - Default: 500
   "projectSettingsSync.debounceDelay": 200,
 
-  // プロジェクト以外のファイルを開いた際に、適用済みの設定をリセットするか - デフォルト: false
-  // false: 直前のプロジェクト設定を維持
-  // true: 設定を自動的にクリーンアップして初期状態に戻す
+  // Whether to reset applied settings when opening a file outside the projects - Default: false
+  // false: Maintains the previous project settings
+  // true: Automatically cleans up settings to restore the initial state
   "projectSettingsSync.autoCleanup": false,
 
-  // フォーカスモード（検索スコープ制御）を有効にするか - デフォルト: false
-  // false: 全てのファイルが検索可能です
-  // true: 開いているプロジェクト内のファイルしか検索にヒットしなくなります
-  "projectSettingsSync.focusMode": true,
+  // Whether to enable Focus Mode (Search Scope Control) - Default: false
+  // false: All files are searchable
+  // true: Only files within the open project will appear in search results
+  "projectSettingsSync.focusMode": true
 }
 ```
 
-## 🎥 デモ
+🎥 Demo
 
 <img src="https://github.com/Hiroto-Shida/project-settings-sync/blob/main/assets/demo.gif">
+
+In this demo, different color themes are applied to `workbench.colorCustomizations.titleBar.activeBackground` for each project.
+As you can see, the settings are automatically synced and the color theme changes instantly when switching tabs!
