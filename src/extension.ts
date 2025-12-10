@@ -2,6 +2,13 @@ import * as vscode from 'vscode';
 import { ProjectDecorationProvider } from './features/badgeProvider';
 import { applyFocusMode } from './features/focusMode';
 import { syncSettings } from './features/settingsSync';
+import {
+	disposeLogger,
+	initializeLogger,
+	logError,
+	logInfo,
+	logSuccess,
+} from './utils/logger';
 
 let debounceTimer: NodeJS.Timeout | undefined;
 
@@ -9,11 +16,16 @@ let debounceTimer: NodeJS.Timeout | undefined;
  * 拡張機能の有効化処理
  */
 export function activate(context: vscode.ExtensionContext) {
+	// ロガーの初期化
+	initializeLogger();
+	logSuccess('Extension activated');
+
 	// 1. バッジプロバイダーの登録
 	const provider = new ProjectDecorationProvider();
 	context.subscriptions.push(
 		vscode.window.registerFileDecorationProvider(provider),
 	);
+	logInfo('Badge provider registered');
 
 	// 2. アクティブエディタ変更イベントの監視
 	context.subscriptions.push(
@@ -73,12 +85,16 @@ async function performSync(
 	editor: vscode.TextEditor | undefined,
 	force: boolean,
 ) {
-	// 設定同期処理 (FocusModeの設定もここでマージして書き込まれます)
-	await syncSettings(editor, force);
+	try {
+		// 設定同期処理 (FocusModeの設定もここでマージして書き込まれます)
+		await syncSettings(editor, force);
 
-	// 設定変更時など、強制実行の際は念のため FocusMode 単体処理も実行
-	if (force) {
-		await applyFocusMode(editor, force);
+		// 設定変更時など、強制実行の際は念のため FocusMode 単体処理も実行
+		if (force) {
+			await applyFocusMode(editor, force);
+		}
+	} catch (error) {
+		logError(`Sync failed: ${error}`);
 	}
 }
 
@@ -86,4 +102,5 @@ export function deactivate() {
 	if (debounceTimer) {
 		clearTimeout(debounceTimer);
 	}
+	disposeLogger();
 }

@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import { parse } from 'jsonc-parser';
 import * as vscode from 'vscode';
 import type { MappingItem } from '../types';
+import { logError } from './logger';
 import { findSettingsDir } from './pathUtils';
 
 /**
@@ -41,7 +42,7 @@ export function loadSettingsForEditor(editor: vscode.TextEditor | undefined): {
 				return json;
 			}
 		} catch (e) {
-			console.error(`設定読み込み失敗: ${settingsPath}`, e);
+			logError(`Failed to load settings from ${settingsPath}: ${e}`);
 		}
 	}
 

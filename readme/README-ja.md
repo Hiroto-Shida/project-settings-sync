@@ -76,3 +76,18 @@ admin-project/
 <img src="https://github.com/Hiroto-Shida/project-settings-sync/blob/main/readme/demo.gif">
 
 `workbench.colorCustomizations.titleBar.activeBackground` にそれぞれ異なるカラーテーマを当てているプロジェクトの切り替え時に、自動でその設定が同期され、タブ切り替え時にカラーテーマが変わっています！
+
+## ⚠️ 既知の問題とトラブルシューティング
+
+### i18n-ally との競合について
+拡張機能 [i18n-ally](https://github.com/lokalise/i18n-ally) をサブプロジェクトで使用している場合、本拡張機能によるプロジェクト切り替え時に、i18n-ally の設定（フレームワーク検知など）が正しく反映されない場合があります。
+
+この問題は、以下の設定を見直すことで対処可能です：
+* 各サブプロジェクト（またはルートディレクトリ）の `settings.json` に、`"i18n-ally.enabledFrameworks"` を明示的に設定してください。
+
+### その他、拡張機能が正しく動作しない場合
+本拡張機能の挙動がおかしい場合や、設定が反映されない場合は、出力ログを確認してください。
+
+1. コマンドパレットを開く (`Cmd + Shift + P` / `Ctrl + Shift + P`)
+2. **"Output: Focus on Output View"** (出力: 出力ビューにフォーカス) を検索して選択
+3. 出力パネル右上のドロップダウンメニューから **"Project Settings Sync"** を選択し、ログを確認してください。

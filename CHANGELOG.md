@@ -4,6 +4,14 @@ All notable changes to the "project-settings-sync" extension will be documented 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+# Change Log
+
+## [0.1.0] - 2025-12-10
+
+### Added
+- **Output Logging**: Added an Output Channel for easier debugging. You can check logs via "Output: Project Settings Sync".
+- **Documentation**: Added troubleshooting guide for conflicts with other extensions (e.g., i18n-ally).
+
 ## [0.0.1] - 2025-12-07
 
 ### Added

@@ -14,6 +14,7 @@ import {
 	getSettingsPathForEditor,
 	loadSettingsForEditor,
 } from '../utils/configUtils';
+import { logError, logWarning } from '../utils/logger';
 import { findSettingsDir, resolveSettingsPaths } from '../utils/pathUtils';
 import { getFocusModeRules } from './focusMode';
 
@@ -32,7 +33,9 @@ export async function syncSettings(
 	force: boolean = false,
 ) {
 	// 排他制御
-	if (isSyncing) return;
+	if (isSyncing) {
+		return;
+	}
 
 	try {
 		isSyncing = true;
@@ -45,7 +48,9 @@ export async function syncSettings(
 
 		// 対象外ファイルのハンドリング
 		if (nextSettingsPath === null) {
-			if (!autoCleanup) return;
+			if (!autoCleanup) {
+				return;
+			}
 		}
 
 		// キャッシュチェック: 強制モードでなく、かつパスが変わっていなければ早期リターン
@@ -59,7 +64,10 @@ export async function syncSettings(
 		let targetSettings = loadSettingsForEditor(editor);
 
 		const workspaceFolders = vscode.workspace.workspaceFolders;
-		if (!workspaceFolders) return;
+		if (!workspaceFolders) {
+			logWarning('No workspace folders found');
+			return;
+		}
 		const rootPath = workspaceFolders[0].uri.fsPath;
 
 		// パス書き換え処理 & 現在のファイルパス取得
@@ -203,19 +211,21 @@ export async function syncSettings(
 			const success = await vscode.workspace.applyEdit(workspaceEdit);
 			if (success) {
 				await openDoc.save();
+			} else {
+				logError('Failed to apply WorkspaceEdit');
 			}
 		} else {
 			// 閉じている場合は fs で直接書き込み (高速)
 			try {
 				fs.writeFileSync(rootSettingsPath, content, 'utf8');
 			} catch (e) {
-				console.error(`書き込み失敗: ${e}`);
+				logError(`Failed to write settings: ${e}`);
 			}
 		}
 
 		previouslyAppliedKeys = newKeys;
 	} catch (e) {
-		console.error('[ERROR] syncSettings で例外が発生しました:', e);
+		logError(`Exception in syncSettings: ${e}`);
 	} finally {
 		isSyncing = false;
 	}

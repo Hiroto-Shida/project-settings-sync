@@ -82,3 +82,18 @@ Add the following configuration to your **root** `.vscode/settings.json`:
 
 In this demo, different color themes are applied to `workbench.colorCustomizations.titleBar.activeBackground` for each project.
 As you can see, the settings are automatically synced and the color theme changes instantly when switching tabs!
+
+## ⚠️ Known Issues & Troubleshooting
+
+### Conflict with i18n-ally
+If you are using the [i18n-ally](https://github.com/lokalise/i18n-ally) extension in sub-projects, its settings (such as framework detection) may not be applied correctly when switching projects with this extension.
+
+This can be resolved by configuring the following setting:
+* Explicitly set `"i18n-ally.enabledFrameworks"` in the `settings.json` of each sub-project (or the root directory).
+
+### If the extension is not working correctly
+If settings are not syncing or you encounter unexpected behavior, please check the extension logs.
+
+1. Open the Command Palette (`Cmd + Shift + P` / `Ctrl + Shift + P`).
+2. Search for and select **"Output: Focus on Output View"**.
+3. Select **"Project Settings Sync"** from the dropdown menu in the Output panel to view the logs.

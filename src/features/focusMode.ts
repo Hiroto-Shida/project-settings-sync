@@ -9,6 +9,7 @@ import {
 } from 'jsonc-parser';
 import * as vscode from 'vscode';
 import type { MappingItem } from '../types';
+import { logError, logWarning } from '../utils/logger';
 
 // 無駄な書き込みを防ぐためのキャッシュ
 let previousRulesJSON: string | null = null;
@@ -52,7 +53,9 @@ export function getFocusModeRules(
 
 	// プロジェクト外のファイルを開いた場合
 	if (!activeProjectPath) {
-		if (!autoCleanup) return null;
+		if (!autoCleanup) {
+			return null;
+		}
 	}
 
 	const rules: Record<string, boolean> = {};
@@ -92,7 +95,9 @@ export async function applyFocusMode(
 	}
 
 	const workspaceFolders = vscode.workspace.workspaceFolders;
-	if (!workspaceFolders) return;
+	if (!workspaceFolders) {
+		return;
+	}
 	const rootPath = workspaceFolders[0].uri.fsPath;
 
 	let currentFilePath = '';
@@ -123,7 +128,10 @@ export async function applyFocusMode(
 
 	// ファイル操作
 	const rootSettingsPath = path.join(rootPath, '.vscode', 'settings.json');
-	if (!fs.existsSync(rootSettingsPath)) return;
+	if (!fs.existsSync(rootSettingsPath)) {
+		logWarning(`Settings file not found: ${rootSettingsPath}`);
+		return;
+	}
 
 	// 最新状態を読み込むために fs を使用
 	const content = fs.readFileSync(rootSettingsPath, 'utf8');
@@ -160,7 +168,7 @@ export async function applyFocusMode(
 		try {
 			fs.writeFileSync(rootSettingsPath, newContent, 'utf8');
 		} catch (e) {
-			console.error(`focusMode書き込み失敗: ${e}`);
+			logError(`Failed to write Focus Mode settings: ${e}`);
 		}
 	}
 }
